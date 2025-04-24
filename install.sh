@@ -544,4 +544,70 @@ configs(){
     fi
 
     # Copy gf examples if they exist
-    if [ -d "~/go/src/github.com/tomnomnom/gf/examples
+    if [ -d "$HOME/go/src/github.com/tomnomnom/gf/examples" ]; then
+        cp -r $HOME/go/src/github.com/tomnomnom/gf/examples/* ~/.gf/
+    fi
+
+    # Add gf completion to bashrc if it's not already there
+    if ! grep -q 'gf-completion.bash' ~/.bashrc; then
+        if [ -f "$HOME/go/src/github.com/tomnomnom/gf/gf-completion.bash" ]; then
+            echo "source $HOME/go/src/github.com/tomnomnom/gf/gf-completion.bash" >> ~/.bashrc
+        fi
+    fi
+
+    # Add GOPATH/bin to PATH in bashrc if it's not already there
+    if ! grep -q 'GOPATH/bin' ~/.bashrc; then
+        echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.bashrc
+    fi
+
+    # Clone Gf-Patterns and move json files if not already done
+    if [ ! -f ~/.gf/redirect.json ]; then
+        git clone https://github.com/1ndianl33t/Gf-Patterns ~/Gf-Patterns 2> /dev/null
+        if [ -d ~/Gf-Patterns ]; then
+            cp ~/Gf-Patterns/*.json ~/.gf/
+            rm -rf ~/Gf-Patterns
+        fi
+    fi
+
+    # Clone Garud, move payloads, and clean up if not already done
+    if [ ! -f ~/.gf/cors.json ]; then
+        git clone https://github.com/R0X4R/Garud.git ~/Garud 2> /dev/null
+        if [ -d ~/Garud/.github/payloads/patterns ]; then
+            cp ~/Garud/.github/payloads/patterns/*.json ~/.gf/
+            rm -rf ~/Garud
+        fi
+    fi
+
+    # Ensure all binaries from go/bin are in /usr/bin if they aren't already there
+    if [ -d ~/go/bin ]; then
+        sudo cp ~/go/bin/* /usr/bin/ 2>/dev/null || true
+    fi
+
+    # Update nuclei templates
+    if command -v nuclei &> /dev/null; then
+        nuclei -update-templates &> /dev/null
+    fi
+}
+
+sleep 2s
+clear
+
+# Install Tools
+echo -e "${LCYAN}[*]${NORMAL} Installing Tools"
+main(){
+    dirs
+    dependencies
+    python_tools
+    wordlists
+    go_tools
+    configs
+    echo -e "${GREEN}[*]${NORMAL} All Tools are installed successfully"
+    # echo -e "${YELLOW}[*]${NORMAL} Please configure notify API's in ${BOLD}${RED}~/.config/notify/provider-config.yaml${NORMAL} file"
+    # echo -e "${YELLOW}[*]${NORMAL}${BOLD} Don't forget to add your API keys in the config file of the tools"
+    webcopilot -h 2> /dev/null
+}
+
+while true; do
+    main
+    exit
+done
