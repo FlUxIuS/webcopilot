@@ -127,10 +127,10 @@ dependencies(){
         mkdir -p $GOPATH/{src,pkg,bin}
     fi
 
-    if ! command -v snapd &> /dev/null; then
+    if ! command -v snap &> /dev/null; then
         echo -e "${YELLOW}[*]${NORMAL} snapd could not be found ${LCYAN}[*]${NORMAL} Installing snapd"
         sudo apt install snapd -y 2> /dev/null
-        if command -v snapd &> /dev/null; then
+        if command -v snap &> /dev/null; then
             echo -e "${GREEN}[*]${NORMAL} snapd is installed successfully"
         else
             echo -e "${RED}[*]${NORMAL} snapd is not installed successfully, Please install it manually"
@@ -175,10 +175,10 @@ dependencies(){
         echo -e "${GREEN}[*]${NORMAL} gobuster is already installed"
     fi
 
-    if ! command -v chromium &> /dev/null; then
+    if ! command -v chromium &> /dev/null && ! snap list chromium &> /dev/null; then
         echo -e "${YELLOW}[*]${NORMAL} chromium could not be found ${LCYAN}[*]${NORMAL} Installing chromium"
         sudo snap install chromium 2> /dev/null
-        if command -v chromium &> /dev/null; then
+        if snap list chromium &> /dev/null; then
             echo -e "${GREEN}[*]${NORMAL} chromium is installed successfully"
         else
             echo -e "${RED}[*]${NORMAL} chromium is not installed successfully, Please install it manually"
@@ -329,13 +329,16 @@ go_tools(){
     # Ensure Go environment is set up
     export GOPATH=$HOME/go
     export PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
+    export GOSUMDB=off  # Disable sum verification to fix the "missing GOSUMDB" error
+    export GO111MODULE=on
+    export GOBIN=$GOPATH/bin
     
     # Create Go directories if they don't exist
     mkdir -p $GOPATH/{src,pkg,bin}
     
     if ! command -v anew &> /dev/null && [ ! -f ~/go/bin/anew ]; then
         echo -e "${YELLOW}[*]${NORMAL} anew could not be found ${LCYAN}[*]${NORMAL} Installing anew"
-        GO111MODULE=on go install github.com/tomnomnom/anew@latest
+        GOBIN=$GOPATH/bin GO111MODULE=on GOSUMDB=off go install github.com/tomnomnom/anew@latest
         if [ -f ~/go/bin/anew ]; then
             echo -e "${GREEN}[*]${NORMAL} anew is installed successfully"
         else
@@ -347,7 +350,7 @@ go_tools(){
 
     if ! command -v gf &> /dev/null && [ ! -f ~/go/bin/gf ]; then
         echo -e "${YELLOW}[*]${NORMAL} gf could not be found ${LCYAN}[*]${NORMAL} Installing gf"
-        GO111MODULE=on go install github.com/tomnomnom/gf@latest
+        go install github.com/tomnomnom/gf@latest
         if [ -f ~/go/bin/gf ]; then
             echo -e "${GREEN}[*]${NORMAL} gf is installed successfully"
         else
@@ -359,7 +362,7 @@ go_tools(){
 
     if ! command -v aquatone &> /dev/null && [ ! -f ~/go/bin/aquatone ]; then
         echo -e "${YELLOW}[*]${NORMAL} aquatone could not be found ${LCYAN}[*]${NORMAL} Installing aquatone"
-        GO111MODULE=on go install github.com/michenriksen/aquatone@latest
+        go install github.com/michenriksen/aquatone@latest
         if [ -f ~/go/bin/aquatone ]; then
             echo -e "${GREEN}[*]${NORMAL} aquatone is installed successfully"
         else
@@ -371,7 +374,7 @@ go_tools(){
 
     if ! command -v assetfinder &> /dev/null && [ ! -f ~/go/bin/assetfinder ]; then
         echo -e "${YELLOW}[*]${NORMAL} assetfinder could not be found ${LCYAN}[*]${NORMAL} Installing assetfinder"
-        GO111MODULE=on go install github.com/tomnomnom/assetfinder@latest
+        go install github.com/tomnomnom/assetfinder@latest
         if [ -f ~/go/bin/assetfinder ]; then
             echo -e "${GREEN}[*]${NORMAL} assetfinder is installed successfully"
         else
@@ -383,7 +386,7 @@ go_tools(){
 
     if ! command -v gau &> /dev/null && [ ! -f ~/go/bin/gau ]; then
         echo -e "${YELLOW}[*]${NORMAL} gau could not be found ${LCYAN}[*]${NORMAL} Installing gau"
-        GO111MODULE=on go install github.com/lc/gau/v2/cmd/gau@latest
+        go install github.com/lc/gau/v2/cmd/gau@latest
         if [ -f ~/go/bin/gau ]; then
             echo -e "${GREEN}[*]${NORMAL} gau is installed successfully"
         else
@@ -395,7 +398,7 @@ go_tools(){
 
     if ! command -v waybackurls &> /dev/null && [ ! -f ~/go/bin/waybackurls ]; then
         echo -e "${YELLOW}[*]${NORMAL} waybackurls could not be found ${LCYAN}[*]${NORMAL} Installing waybackurls"
-        GO111MODULE=on go install github.com/tomnomnom/waybackurls@latest
+        go install github.com/tomnomnom/waybackurls@latest
         if [ -f ~/go/bin/waybackurls ]; then
             echo -e "${GREEN}[*]${NORMAL} waybackurls is installed successfully"
         else
@@ -407,7 +410,7 @@ go_tools(){
 
     if ! command -v httpx &> /dev/null && [ ! -f ~/go/bin/httpx ]; then
         echo -e "${YELLOW}[*]${NORMAL} httpx could not be found ${LCYAN}[*]${NORMAL} Installing httpx"
-        GO111MODULE=on go install github.com/projectdiscovery/httpx/cmd/httpx@latest
+        go install github.com/projectdiscovery/httpx/cmd/httpx@latest
         if [ -f ~/go/bin/httpx ]; then
             echo -e "${GREEN}[*]${NORMAL} httpx is installed successfully"
         else
@@ -419,7 +422,7 @@ go_tools(){
 
     if ! command -v amass &> /dev/null && [ ! -f ~/go/bin/amass ]; then
         echo -e "${YELLOW}[*]${NORMAL} amass could not be found ${LCYAN}[*]${NORMAL} Installing amass"
-        GO111MODULE=on go install github.com/owasp-amass/amass/v4/...@master
+        go install github.com/owasp-amass/amass/v4/...@master
         if [ -f ~/go/bin/amass ]; then
             echo -e "${GREEN}[*]${NORMAL} amass is installed successfully"
         else
@@ -431,7 +434,7 @@ go_tools(){
 
     if ! command -v kxss &> /dev/null && [ ! -f ~/go/bin/kxss ]; then
         echo -e "${YELLOW}[*]${NORMAL} kxss could not be found ${LCYAN}[*]${NORMAL} Installing kxss"
-        GO111MODULE=on go install github.com/Emoe/kxss@latest
+        go install github.com/Emoe/kxss@latest
         if [ -f ~/go/bin/kxss ]; then
             echo -e "${GREEN}[*]${NORMAL} kxss is installed successfully"
         else
@@ -443,7 +446,7 @@ go_tools(){
 
     if ! command -v subjack &> /dev/null && [ ! -f ~/go/bin/subjack ]; then
         echo -e "${YELLOW}[*]${NORMAL} subjack could not be found ${LCYAN}[*]${NORMAL} Installing subjack"
-        GO111MODULE=on go install github.com/haccer/subjack@latest
+        go install github.com/haccer/subjack@latest
         if [ -f ~/go/bin/subjack ]; then
             echo -e "${GREEN}[*]${NORMAL} subjack is installed successfully"
         else
@@ -455,7 +458,7 @@ go_tools(){
 
     if ! command -v qsreplace &> /dev/null && [ ! -f ~/go/bin/qsreplace ]; then
         echo -e "${YELLOW}[*]${NORMAL} qsreplace could not be found ${LCYAN}[*]${NORMAL} Installing qsreplace"
-        GO111MODULE=on go install github.com/tomnomnom/qsreplace@latest
+        go install github.com/tomnomnom/qsreplace@latest
         if [ -f ~/go/bin/qsreplace ]; then
             echo -e "${GREEN}[*]${NORMAL} qsreplace is installed successfully"
         else
@@ -467,7 +470,7 @@ go_tools(){
 
     if ! command -v dnsx &> /dev/null && [ ! -f ~/go/bin/dnsx ]; then
         echo -e "${YELLOW}[*]${NORMAL} dnsx could not be found ${LCYAN}[*]${NORMAL} Installing dnsx"
-        GO111MODULE=on go install github.com/projectdiscovery/dnsx/cmd/dnsx@latest
+        go install github.com/projectdiscovery/dnsx/cmd/dnsx@latest
         if [ -f ~/go/bin/dnsx ]; then
             echo -e "${GREEN}[*]${NORMAL} dnsx is installed successfully"
         else
@@ -479,7 +482,7 @@ go_tools(){
 
     if ! command -v dalfox &> /dev/null && [ ! -f ~/go/bin/dalfox ]; then
         echo -e "${YELLOW}[*]${NORMAL} dalfox could not be found ${LCYAN}[*]${NORMAL} Installing dalfox"
-        GO111MODULE=on go install github.com/hahwul/dalfox/v2@latest
+        go install github.com/hahwul/dalfox/v2@latest
         if [ -f ~/go/bin/dalfox ]; then
             echo -e "${GREEN}[*]${NORMAL} dalfox is installed successfully"
         else
@@ -491,7 +494,7 @@ go_tools(){
 
     if ! command -v crlfuzz &> /dev/null && [ ! -f ~/go/bin/crlfuzz ]; then
         echo -e "${YELLOW}[*]${NORMAL} crlfuzz could not be found ${LCYAN}[*]${NORMAL} Installing crlfuzz"
-        GO111MODULE=on go install github.com/dwisiswant0/crlfuzz/cmd/crlfuzz@latest
+        go install github.com/dwisiswant0/crlfuzz/cmd/crlfuzz@latest
         if [ -f ~/go/bin/crlfuzz ]; then
             echo -e "${GREEN}[*]${NORMAL} crlfuzz is installed successfully"
         else
@@ -503,7 +506,7 @@ go_tools(){
 
     if ! command -v nuclei &> /dev/null && [ ! -f ~/go/bin/nuclei ]; then
         echo -e "${YELLOW}[*]${NORMAL} nuclei could not be found ${LCYAN}[*]${NORMAL} Installing nuclei"
-        GO111MODULE=on go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+        go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
         if [ -f ~/go/bin/nuclei ]; then
             echo -e "${GREEN}[*]${NORMAL} nuclei is installed successfully"
         else
@@ -515,7 +518,7 @@ go_tools(){
 
     if ! command -v subfinder &> /dev/null && [ ! -f ~/go/bin/subfinder ]; then
         echo -e "${YELLOW}[*]${NORMAL} subfinder could not be found ${LCYAN}[*]${NORMAL} Installing subfinder"
-        GO111MODULE=on go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+        go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
         if [ -f ~/go/bin/subfinder ]; then
             echo -e "${GREEN}[*]${NORMAL} subfinder is installed successfully"
         else
