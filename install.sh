@@ -206,6 +206,19 @@ dependencies(){
     else
         echo -e "${GREEN}[*]${NORMAL} unzip is already installed"
     fi
+
+    if ! command -v parallel &> /dev/null; then
+        echo -e "${YELLOW}[*]${NORMAL} parallel could not be found ${LCYAN}[*]${NORMAL} Installing parallel"
+        sudo apt-get install -y parallel 2> /dev/null
+        if command -v parallel &> /dev/null; then
+            echo -e "${GREEN}[*]${NORMAL} parallel is installed successfully"
+        else
+            echo -e "${RED}[*]${NORMAL} parallel is not installed successfully, Please install it manually"
+        fi
+    else
+        echo -e "${GREEN}[*]${NORMAL} parallel is already installed"
+    fi
+}
 }
 
 sleep 2s
