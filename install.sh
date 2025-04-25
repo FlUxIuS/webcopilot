@@ -195,8 +195,16 @@ dependencies(){
         else
             echo -e "${RED}[*]${NORMAL} parallel is not installed successfully, Please install it manually"
         fi
+    if ! command -v unzip &> /dev/null; then
+        echo -e "${YELLOW}[*]${NORMAL} unzip could not be found ${LCYAN}[*]${NORMAL} Installing unzip"
+        sudo apt install unzip -y 2> /dev/null
+        if command -v unzip &> /dev/null; then
+            echo -e "${GREEN}[*]${NORMAL} unzip is installed successfully"
+        else
+            echo -e "${RED}[*]${NORMAL} unzip is not installed successfully, Please install it manually"
+        fi
     else
-        echo -e "${GREEN}[*]${NORMAL} parallel is already installed"
+        echo -e "${GREEN}[*]${NORMAL} unzip is already installed"
     fi
 }
 
@@ -363,7 +371,22 @@ go_tools(){
 
     if ! command -v aquatone &> /dev/null && [ ! -f ~/go/bin/aquatone ]; then
         echo -e "${YELLOW}[*]${NORMAL} aquatone could not be found ${LCYAN}[*]${NORMAL} Installing aquatone"
-        go install github.com/michenriksen/aquatone@latest
+        # Download pre-built binary instead of compiling from source
+        ARCH=$(uname -m)
+        if [[ "$ARCH" == "x86_64" ]]; then
+            wget https://github.com/michenriksen/aquatone/releases/download/v1.7.0/aquatone_linux_amd64_1.7.0.zip -O aquatone.zip
+        elif [[ "$ARCH" == "aarch64" ]] || [[ "$ARCH" == "arm64" ]]; then
+            wget https://github.com/michenriksen/aquatone/releases/download/v1.7.0/aquatone_linux_arm64_1.7.0.zip -O aquatone.zip
+        else
+            echo -e "${RED}[*]${NORMAL} Unsupported architecture for aquatone: $ARCH"
+            return 1
+        fi
+        
+        unzip aquatone.zip
+        chmod +x aquatone
+        mv aquatone $GOPATH/bin/
+        rm aquatone.zip
+        
         if [ -f ~/go/bin/aquatone ]; then
             echo -e "${GREEN}[*]${NORMAL} aquatone is installed successfully"
         else
