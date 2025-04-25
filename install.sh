@@ -219,7 +219,6 @@ dependencies(){
         echo -e "${GREEN}[*]${NORMAL} parallel is already installed"
     fi
 }
-}
 
 sleep 2s
 clear
