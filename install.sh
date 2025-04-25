@@ -8,6 +8,9 @@ GREEN="\033[0;32m"
 YELLOW="\033[1;33m"
 LCYAN="\033[1;36m"
 
+# Set TERM environment variable if not set
+export TERM=${TERM:-dumb}
+
 # Error handling function
 error_exit() {
     echo -e "${RED}[ERROR]${NORMAL} $1" >&2
@@ -31,7 +34,10 @@ fi
 set -e
 trap 'error_exit "Script failed at line $LINENO"' ERR
 
-clear
+# Only clear screen if in interactive terminal
+if [ -t 1 ]; then
+    clear
+fi
 cd
 
 # Create Directories
@@ -116,7 +122,7 @@ dependencies(){
         debug_log "Downloading Go..."
         # Detect architecture
         ARCH=$(uname -m)
-        GO_VERSION="1.24.2"
+        GO_VERSION="1.22.2"
         GO_ARCH=""
         
         case "$ARCH" in
@@ -153,9 +159,6 @@ dependencies(){
         # Create Go directories
         mkdir -p $GOPATH/{src,pkg,bin}
         
-        # Source bashrc to update current session
-        source ~/.bashrc
-        
         if command -v go &> /dev/null; then
             echo -e "${GREEN}[*]${NORMAL} golang-go is installed successfully"
             debug_log "Go version: $(go version)"
@@ -170,23 +173,25 @@ dependencies(){
         mkdir -p $GOPATH/{src,pkg,bin}
     fi
 
-    # Snap
-    if ! command -v snap &> /dev/null; then
-        echo -e "${YELLOW}[*]${NORMAL} snapd could not be found ${LCYAN}[*]${NORMAL} Installing snapd"
-        sudo apt install snapd -y || error_exit "Failed to install snapd"
-        # Wait for snapd to be ready
-        sleep 3
-        if command -v snap &> /dev/null; then
-            echo -e "${GREEN}[*]${NORMAL} snapd is installed successfully"
+    # Snap - Skip in Docker environments
+    if [ ! -f /.dockerenv ]; then
+        if ! command -v snap &> /dev/null; then
+            echo -e "${YELLOW}[*]${NORMAL} snapd could not be found ${LCYAN}[*]${NORMAL} Installing snapd"
+            sudo apt install snapd -y || error_exit "Failed to install snapd"
+            if command -v snap &> /dev/null; then
+                echo -e "${GREEN}[*]${NORMAL} snapd is installed successfully"
+            else
+                echo -e "${YELLOW}[*]${NORMAL} snapd may require system restart"
+            fi
         else
-            echo -e "${YELLOW}[*]${NORMAL} snapd may require system restart"
+            echo -e "${GREEN}[*]${NORMAL} snapd is already installed"
         fi
     else
-        echo -e "${GREEN}[*]${NORMAL} snapd is already installed"
+        echo -e "${YELLOW}[*]${NORMAL} Skipping snapd installation in Docker environment"
     fi
 
     # Other dependencies
-    local deps=(cmake jq gobuster parallel unzip)
+    local deps=(cmake jq gobuster parallel unzip wget)
     for dep in "${deps[@]}"; do
         if ! command -v "$dep" &> /dev/null; then
             echo -e "${YELLOW}[*]${NORMAL} $dep could not be found ${LCYAN}[*]${NORMAL} Installing $dep"
@@ -201,16 +206,20 @@ dependencies(){
         fi
     done
 
-    # Chromium (via snap)
-    if ! command -v chromium &> /dev/null && ! snap list chromium &> /dev/null; then
-        echo -e "${YELLOW}[*]${NORMAL} chromium could not be found ${LCYAN}[*]${NORMAL} Installing chromium"
-        if command -v snap &> /dev/null; then
-            sudo snap install chromium || echo -e "${YELLOW}[*]${NORMAL} Chromium installation via snap failed - non-critical"
+    # Chromium (via snap) - Skip in Docker
+    if [ ! -f /.dockerenv ]; then
+        if ! command -v chromium &> /dev/null && ! snap list chromium &> /dev/null; then
+            echo -e "${YELLOW}[*]${NORMAL} chromium could not be found ${LCYAN}[*]${NORMAL} Installing chromium"
+            if command -v snap &> /dev/null; then
+                sudo snap install chromium || echo -e "${YELLOW}[*]${NORMAL} Chromium installation via snap failed - non-critical"
+            else
+                echo -e "${YELLOW}[*]${NORMAL} Snap not available, skipping chromium installation"
+            fi
         else
-            echo -e "${YELLOW}[*]${NORMAL} Snap not available, skipping chromium installation"
+            echo -e "${GREEN}[*]${NORMAL} chromium is already installed"
         fi
     else
-        echo -e "${GREEN}[*]${NORMAL} chromium is already installed"
+        echo -e "${YELLOW}[*]${NORMAL} Skipping chromium installation in Docker environment"
     fi
 }
 
@@ -326,6 +335,12 @@ wordlists(){
     done
 }
 
+sleep 2s
+# Only clear screen if in interactive terminal
+if [ -t 1 ]; then
+    clear
+fi
+
 # Install Go Tools
 go_tools(){
     debug_log "Installing Go tools..."
@@ -405,6 +420,13 @@ go_tools(){
     fi
 }
 
+sleep 2s
+# Only clear screen if in interactive terminal
+if [ -t 1 ]; then
+    clear
+fi
+cd
+
 # Configure Tools and Setup Environment
 configs(){
     debug_log "Configuring tools..."
@@ -464,6 +486,12 @@ configs(){
         nuclei -update-templates &> /dev/null || echo -e "${YELLOW}[*]${NORMAL} Failed to update nuclei templates"
     fi
 }
+
+sleep 2s
+# Only clear screen if in interactive terminal
+if [ -t 1 ]; then
+    clear
+fi
 
 # Install Tools
 main(){
