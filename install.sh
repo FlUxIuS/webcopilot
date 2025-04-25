@@ -85,8 +85,8 @@ dependencies(){
     if ! command -v go &> /dev/null; then
         echo -e "${YELLOW}[*]${NORMAL} golang-go could not be found ${LCYAN}[*]${NORMAL} Installing golang-go"
         # Download and install Go
-        wget https://go.dev/dl/go1.22.2.linux-amd64.tar.gz
-        sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz
+        wget https://go.dev/dl/go1.24.2.linux-amd64.tar.gz
+        sudo tar -C /usr/local -xzf go1.24.2.linux-amd64.tar.gz
         
         # Remove existing Go configurations from bashrc if they exist
         sed -i '/\/usr\/local\/go\/bin/d' ~/.bashrc
@@ -100,7 +100,7 @@ dependencies(){
         echo 'export PATH=$PATH:$GOPATH/bin' >> ~/.bashrc
         
         # Remove downloaded archive
-        rm -f go1.22.2.linux-amd64.tar.gz
+        rm -f go1.24.2.linux-amd64.tar.gz
         
         # Set environment variables for current session
         export PATH=$PATH:/usr/local/go/bin
