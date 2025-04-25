@@ -329,7 +329,8 @@ go_tools(){
     # Ensure Go environment is set up
     export GOPATH=$HOME/go
     export PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
-    export GOSUMDB=off  # Disable sum verification to fix the "missing GOSUMDB" error
+    export GOPROXY=https://proxy.golang.org,direct  # Fix GOPROXY configuration
+    export GOSUMDB=sum.golang.org  # Enable GOSUMDB with default
     export GO111MODULE=on
     export GOBIN=$GOPATH/bin
     
